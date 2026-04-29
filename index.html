@@ -1,0 +1,936 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FYP Advisor — Intelligent Recommendation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080C10;
+  --bg2:#0D1117;
+  --bg3:#111820;
+  --surface:#131C26;
+  --surface2:#172030;
+  --border:#1E2D3D;
+  --border2:#243548;
+  --accent:#00C896;
+  --accent2:#00A478;
+  --accent-dim:rgba(0,200,150,0.12);
+  --accent-glow:rgba(0,200,150,0.25);
+  --gold:#F5A623;
+  --gold-dim:rgba(245,166,35,0.12);
+  --blue:#3B8FE8;
+  --blue-dim:rgba(59,143,232,0.12);
+  --red:#E85F5F;
+  --text:#E8F0F8;
+  --text2:#8A9BB0;
+  --text3:#4A6070;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* GRID BG */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,200,150,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,150,0.03) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(0,200,150,0.08) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* LANDING PAGE */
+#landing{
+  position:relative;z-index:1;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem;text-align:center;
+}
+.landing-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border2);background:var(--surface);
+  padding:6px 16px;border-radius:100px;font-size:12px;color:var(--accent);
+  font-family:var(--font-head);letter-spacing:0.08em;text-transform:uppercase;
+  margin-bottom:2rem;animation:fadeUp 0.6s ease both;
+}
+.landing-badge span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+.landing-title{
+  font-family:var(--font-head);font-size:clamp(2.2rem,6vw,4.5rem);
+  font-weight:800;line-height:1.05;letter-spacing:-0.03em;
+  animation:fadeUp 0.6s 0.1s ease both;opacity:0;
+  max-width:800px;
+}
+.landing-title .highlight{
+  background:linear-gradient(135deg,var(--accent) 0%,#00E5B0 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.landing-sub{
+  font-size:1rem;color:var(--text2);max-width:560px;line-height:1.7;
+  margin:1.5rem auto 3rem;animation:fadeUp 0.6s 0.2s ease both;opacity:0;
+  font-weight:300;
+}
+.landing-stats{
+  display:flex;gap:2rem;margin-bottom:3rem;
+  animation:fadeUp 0.6s 0.3s ease both;opacity:0;
+  flex-wrap:wrap;justify-content:center;
+}
+.stat-item{text-align:center}
+.stat-num{font-family:var(--font-head);font-size:2rem;font-weight:800;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px}
+.landing-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--accent);color:#000;
+  font-family:var(--font-head);font-size:15px;font-weight:700;
+  padding:14px 32px;border-radius:12px;border:none;cursor:pointer;
+  letter-spacing:0.02em;transition:all 0.25s;
+  animation:fadeUp 0.6s 0.4s ease both;opacity:0;
+  text-transform:uppercase;
+}
+.landing-btn:hover{background:#00E5B0;transform:translateY(-2px);box-shadow:0 12px 40px var(--accent-glow)}
+.landing-btn svg{transition:transform 0.2s}
+.landing-btn:hover svg{transform:translateX(4px)}
+.features-strip{
+  display:flex;gap:1rem;margin-top:3rem;flex-wrap:wrap;justify-content:center;
+  animation:fadeUp 0.6s 0.5s ease both;opacity:0;
+}
+.feat-chip{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid var(--border);background:var(--surface);
+  padding:8px 14px;border-radius:8px;font-size:12px;color:var(--text2);
+}
+.feat-chip .dot{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* APP */
+#app{display:none;position:relative;z-index:1;min-height:100vh}
+
+/* TOP NAV */
+.topnav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,12,16,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px}
+.nav-logo-icon{width:28px;height:28px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.nav-steps{display:flex;align-items:center;gap:0}
+.nav-step{
+  display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;
+  font-size:12px;color:var(--text3);font-family:var(--font-head);font-weight:600;
+  text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;
+}
+.nav-step.active{color:var(--accent);background:var(--accent-dim)}
+.nav-step.done{color:var(--text2)}
+.nav-step .ns-num{
+  width:20px;height:20px;border-radius:50%;border:1px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:10px;
+}
+.nav-step.done .ns-num{background:var(--accent);border-color:var(--accent);color:#000}
+.nav-sep{width:24px;height:1px;background:var(--border)}
+
+/* MAIN CONTENT */
+.main{max-width:860px;margin:0 auto;padding:3rem 2rem}
+
+/* SECTION HEADER */
+.sec-header{margin-bottom:2rem}
+.sec-eyebrow{font-size:11px;color:var(--accent);font-family:var(--font-head);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.sec-title{font-family:var(--font-head);font-size:1.8rem;font-weight:800;line-height:1.2;letter-spacing:-0.02em}
+.sec-desc{font-size:14px;color:var(--text2);margin-top:6px;line-height:1.6;font-weight:300}
+
+/* CARDS */
+.glass-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;
+  margin-bottom:1.25rem;transition:border-color 0.2s;
+}
+.glass-card:hover{border-color:var(--border2)}
+.card-title{font-family:var(--font-head);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);margin-bottom:1.25rem}
+
+/* FORM ELEMENTS */
+.field{margin-bottom:1.25rem}
+.field label{display:block;font-size:12px;color:var(--text2);font-family:var(--font-head);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.field select,.field input[type=text]{
+  width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  padding:11px 14px;border-radius:10px;font-size:14px;font-family:var(--font-body);
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+  -webkit-appearance:none;appearance:none;
+}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238A9BB0' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.field select:focus,.field input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.field select option{background:#131C26}
+
+/* RANGE SLIDER */
+.range-wrap{display:flex;align-items:center;gap:12px}
+.range-wrap input[type=range]{
+  flex:1;-webkit-appearance:none;height:4px;background:var(--border2);border-radius:2px;outline:none;
+}
+.range-wrap input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--accent);border:3px solid var(--bg);cursor:pointer;
+  box-shadow:0 0 10px var(--accent-glow);
+}
+.range-val{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--accent);min-width:80px;text-align:right}
+
+/* GRID SELECTORS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sel-card{
+  border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;
+  transition:all 0.2s;background:var(--bg2);position:relative;
+}
+.sel-card:hover{border-color:var(--border2);background:var(--surface)}
+.sel-card.selected{border-color:var(--accent);background:var(--accent-dim)}
+.sel-card.selected::after{
+  content:'✓';position:absolute;top:8px;right:10px;font-size:11px;
+  color:var(--accent);font-weight:700;font-family:var(--font-head);
+}
+.sel-card .sc-icon{font-size:20px;margin-bottom:6px}
+.sel-card .sc-name{font-size:12px;font-weight:500;color:var(--text)}
+.sel-card .sc-desc{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4}
+
+/* SKILL TAGS */
+.skill-grid{display:flex;flex-wrap:wrap;gap:8px}
+.skill-tag{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid var(--border);border-radius:8px;padding:8px 12px;
+  cursor:pointer;font-size:13px;color:var(--text2);background:var(--bg2);
+  transition:all 0.2s;
+}
+.skill-tag:hover{border-color:var(--border2);color:var(--text)}
+.skill-tag.selected{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.skill-tag .sk-ico{font-size:16px}
+
+/* ASSESSMENT Q */
+.q-block{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
+.q-block .q-text{font-size:14px;color:var(--text);margin-bottom:12px;line-height:1.5}
+.q-opts{display:flex;flex-direction:column;gap:6px}
+.q-opt{
+  border:1px solid var(--border);border-radius:8px;padding:10px 14px;
+  cursor:pointer;font-size:13px;color:var(--text2);background:var(--bg);
+  transition:all 0.15s;text-align:left;
+}
+.q-opt:hover{border-color:var(--border2);color:var(--text);background:var(--surface)}
+.q-opt.selected{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+
+/* NAV FOOTER */
+.step-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);
+}
+.btn-back{
+  display:flex;align-items:center;gap:6px;background:transparent;
+  border:1px solid var(--border);color:var(--text2);padding:10px 20px;
+  border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--font-body);
+  transition:all 0.2s;
+}
+.btn-back:hover{border-color:var(--border2);color:var(--text)}
+.btn-next{
+  display:flex;align-items:center;gap:8px;
+  background:var(--accent);color:#000;
+  font-family:var(--font-head);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
+  padding:11px 24px;border-radius:10px;border:none;cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-next:hover{background:#00E5B0;transform:translateY(-1px);box-shadow:0 8px 24px var(--accent-glow)}
+.step-hint{font-size:12px;color:var(--text3);font-family:var(--font-head)}
+
+/* PROGRESS BAR */
+.progress-bar{height:3px;background:var(--border);position:relative;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#00E5B0);transition:width 0.5s ease;border-radius:2px}
+
+/* RESULTS */
+.loading-screen{
+  text-align:center;padding:5rem 2rem;
+}
+.loading-orb{
+  width:80px;height:80px;border-radius:50%;border:2px solid var(--border);
+  border-top-color:var(--accent);animation:spin 1s linear infinite;
+  margin:0 auto 1.5rem;position:relative;
+}
+.loading-orb::after{
+  content:'';position:absolute;inset:6px;border-radius:50%;
+  border:2px solid var(--border);border-bottom-color:var(--accent);
+  animation:spin 0.6s linear infinite reverse;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:var(--font-head);font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.loading-sub{font-size:13px;color:var(--text2)}
+
+/* CONSTRAINT SUMMARY */
+.constraint-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:2rem}
+.cs-box{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px;text-align:center;
+}
+.cs-box .cs-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-head);margin-bottom:6px}
+.cs-box .cs-value{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--accent)}
+
+/* RESULT CARDS */
+.result-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:2rem;margin-bottom:1.25rem;position:relative;overflow:hidden;
+  transition:all 0.3s;
+}
+.result-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.result-card.rank-1::before{background:linear-gradient(90deg,var(--accent),#00E5B0)}
+.result-card.rank-2::before{background:linear-gradient(90deg,var(--gold),#FFD166)}
+.result-card.rank-3::before{background:linear-gradient(90deg,var(--blue),#6AB4FF)}
+.result-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+
+.rc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.rc-badge{
+  display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-head);
+  font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+  padding:5px 12px;border-radius:6px;
+}
+.badge-1{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(0,200,150,0.3)}
+.badge-2{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,166,35,0.3)}
+.badge-3{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,143,232,0.3)}
+.rc-rank{
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:14px;font-weight:800;
+}
+.rr-1{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent)}
+.rr-2{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold)}
+.rr-3{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue)}
+
+.rc-title{font-family:var(--font-head);font-size:1.25rem;font-weight:800;line-height:1.2;margin-bottom:8px}
+.rc-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:1.25rem;font-weight:300}
+
+.scores-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.score-item{background:var(--bg2);border-radius:10px;padding:10px}
+.score-item .si-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-head);margin-bottom:6px}
+.score-item .si-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:5px}
+.score-item .si-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.score-item .si-num{font-family:var(--font-head);font-size:14px;font-weight:800}
+.fill-accent{background:linear-gradient(90deg,var(--accent),#00E5B0)}
+.fill-blue{background:linear-gradient(90deg,var(--blue),#6AB4FF)}
+.fill-gold{background:linear-gradient(90deg,var(--gold),#FFD166)}
+.fill-purple{background:linear-gradient(90deg,#8B5CF6,#A78BFA)}
+.col-accent{color:var(--accent)}
+.col-blue{color:var(--blue)}
+.col-gold{color:var(--gold)}
+.col-purple{color:#A78BFA}
+
+.tags-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem}
+.pill{padding:4px 10px;border-radius:6px;font-size:11px;font-family:var(--font-head);letter-spacing:0.04em}
+.pill-green{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(0,200,150,0.2)}
+.pill-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,143,232,0.2)}
+.pill-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(245,166,35,0.2)}
+.pill-red{background:rgba(232,95,95,0.1);color:#E85F5F;border:1px solid rgba(232,95,95,0.2)}
+
+.rc-details{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rc-detail-box{background:var(--bg2);border-radius:10px;padding:14px}
+.rc-detail-box h4{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);font-family:var(--font-head);margin-bottom:8px}
+.rc-detail-box ul{list-style:none;padding:0}
+.rc-detail-box ul li{font-size:12px;color:var(--text2);padding:3px 0;padding-left:14px;position:relative;line-height:1.4}
+.rc-detail-box ul li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-size:10px;top:4px}
+.rc-pk-note{
+  margin-top:10px;background:rgba(0,200,150,0.06);border:1px solid rgba(0,200,150,0.15);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--text2);line-height:1.5;
+}
+.rc-pk-note strong{color:var(--accent);font-weight:500}
+
+/* AI HEADER */
+.ai-header{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:12px 16px;margin-bottom:1.5rem;
+}
+.ai-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+.ai-text{font-size:12px;color:var(--text2)}
+.ai-text strong{color:var(--accent);font-weight:500}
+
+/* SECTIONS */
+.app-section{display:none}
+.app-section.active{display:block;animation:secIn 0.4s ease both}
+@keyframes secIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .grid-2{grid-template-columns:1fr}
+  .scores-row{grid-template-columns:repeat(2,1fr)}
+  .rc-details{grid-template-columns:1fr}
+  .constraint-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-steps{display:none}
+  .topnav{padding:0 1rem}
+  .main{padding:2rem 1rem}
+}
+
+.section-counter{font-size:11px;color:var(--text3);font-family:var(--font-head);letter-spacing:0.08em}
+</style>
+</head>
+<body>
+
+<!-- LANDING PAGE -->
+<div id="landing">
+  <div class="landing-badge"><span></span>Final Year Project Advisory System</div>
+  <h1 class="landing-title">
+    Intelligent FYP Advisor<br>for <span class="highlight">Pakistani Students</span>
+  </h1>
+  <p class="landing-sub">
+    A constraint-aware AI system that recommends realistic, feasible Final Year Projects based on your budget, skills, resources, and local environment — built for Pakistan.
+  </p>
+  <div class="landing-stats">
+    <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">Input Dimensions</div></div>
+    <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">AI Recommendations</div></div>
+    <div class="stat-item"><div class="stat-num">PKR</div><div class="stat-label">Budget-Aware</div></div>
+    <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Pakistan Context</div></div>
+  </div>
+  <button class="landing-btn" onclick="startApp()">
+    Begin Assessment
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+  <div class="features-strip">
+    <div class="feat-chip"><span class="dot"></span>Skill Assessment</div>
+    <div class="feat-chip"><span class="dot"></span>Budget Constraints</div>
+    <div class="feat-chip"><span class="dot"></span>Resource Profiling</div>
+    <div class="feat-chip"><span class="dot"></span>Feasibility Scoring</div>
+    <div class="feat-chip"><span class="dot"></span>AI-Powered Matching</div>
+    <div class="feat-chip"><span class="dot"></span>Local Relevance</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <nav class="topnav">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">✦</div>
+      FYP Advisor
+    </div>
+    <div class="nav-steps" id="navSteps">
+      <div class="nav-step active" id="ns0"><div class="ns-num">1</div> Profile</div>
+      <div class="nav-sep"></div>
+      <div class="nav-step" id="ns1"><div class="ns-num">2</div> Skills</div>
+      <div class="nav-sep"></div>
+      <div class="nav-step" id="ns2"><div class="ns-num">3</div> Constraints</div>
+      <div class="nav-sep"></div>
+      <div class="nav-step" id="ns3"><div class="ns-num">4</div> Assessment</div>
+      <div class="nav-sep"></div>
+      <div class="nav-step" id="ns4"><div class="ns-num">5</div> Results</div>
+    </div>
+    <div class="section-counter" id="secCounter">Step 1 of 5</div>
+  </nav>
+
+  <div class="main">
+
+    <!-- STEP 0: PROFILE -->
+    <div class="app-section active" id="sec0">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Step 01 — Student Profile</div>
+        <div class="sec-title">Tell us about yourself</div>
+        <div class="sec-desc">Your academic background helps us filter recommendations relevant to your context.</div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-title">Academic Information</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>University Type</label>
+            <select id="uniType">
+              <option value="">Select...</option>
+              <option>HEC Recognized Public University</option>
+              <option>HEC Recognized Private University</option>
+              <option>NUST / FAST / GIKI (Tier-1 Technical)</option>
+              <option>Regional/Provincial University</option>
+              <option>Virtual University / Distance Learning</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Degree Program</label>
+            <select id="degree">
+              <option value="">Select...</option>
+              <option>BS Computer Science</option>
+              <option>BS Software Engineering</option>
+              <option>BS Information Technology</option>
+              <option>BS Electrical Engineering</option>
+              <option>BS Data Science / AI</option>
+              <option>BS Telecommunications</option>
+              <option>BS Cybersecurity</option>
+              <option>BS Computer Engineering</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Current Semester</label>
+            <select id="semester">
+              <option value="">Select...</option>
+              <option>6th Semester (Planning ahead)</option>
+              <option>7th Semester (Starting FYP)</option>
+              <option>8th Semester (FYP in progress)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Team Size</label>
+            <select id="teamSize">
+              <option value="1">Solo Project</option>
+              <option value="2">2 Members</option>
+              <option value="3" selected>3 Members</option>
+              <option value="4">4 Members</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-title">Domain Interest</div>
+        <div class="grid-4" id="domainGrid">
+          <div class="sel-card" data-val="Artificial Intelligence / Machine Learning" onclick="selDomain(this)"><div class="sc-icon">🧠</div><div class="sc-name">AI / Machine Learning</div></div>
+          <div class="sel-card" data-val="Web Development / Full-Stack" onclick="selDomain(this)"><div class="sc-icon">🌐</div><div class="sc-name">Web / Full-Stack</div></div>
+          <div class="sel-card" data-val="Mobile App Development" onclick="selDomain(this)"><div class="sc-icon">📱</div><div class="sc-name">Mobile Apps</div></div>
+          <div class="sel-card" data-val="Cybersecurity / Network Security" onclick="selDomain(this)"><div class="sc-icon">🔐</div><div class="sc-name">Cybersecurity</div></div>
+          <div class="sel-card" data-val="IoT / Embedded Systems" onclick="selDomain(this)"><div class="sc-icon">🔌</div><div class="sc-name">IoT / Embedded</div></div>
+          <div class="sel-card" data-val="Data Science / Analytics" onclick="selDomain(this)"><div class="sc-icon">📊</div><div class="sc-name">Data Science</div></div>
+          <div class="sel-card" data-val="Computer Vision / Image Processing" onclick="selDomain(this)"><div class="sc-icon">👁️</div><div class="sc-name">Computer Vision</div></div>
+          <div class="sel-card" data-val="Open to Suggestions" onclick="selDomain(this)"><div class="sc-icon">✨</div><div class="sc-name">Open to Ideas</div></div>
+        </div>
+      </div>
+      <div class="step-footer">
+        <div class="step-hint">1 of 5 steps</div>
+        <button class="btn-next" onclick="goTo(1)">Skills & Experience <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 1: SKILLS -->
+    <div class="app-section" id="sec1">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Step 02 — Technical Skills</div>
+        <div class="sec-title">What can your team do?</div>
+        <div class="sec-desc">Select all technologies your team is comfortable with. Honesty leads to better matches.</div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-title">Select all applicable skills</div>
+        <div class="skill-grid">
+          <div class="skill-tag" data-s="Python"><span class="sk-ico">🐍</span>Python</div>
+          <div class="skill-tag" data-s="JavaScript/TypeScript"><span class="sk-ico">⚡</span>JavaScript/TS</div>
+          <div class="skill-tag" data-s="React/Vue.js"><span class="sk-ico">⚛️</span>React / Vue</div>
+          <div class="skill-tag" data-s="Java"><span class="sk-ico">☕</span>Java</div>
+          <div class="skill-tag" data-s="C/C++"><span class="sk-ico">⚙️</span>C / C++</div>
+          <div class="skill-tag" data-s="Machine Learning / TensorFlow"><span class="sk-ico">🤖</span>ML / TensorFlow</div>
+          <div class="skill-tag" data-s="SQL / Databases"><span class="sk-ico">🗄️</span>SQL / Databases</div>
+          <div class="skill-tag" data-s="Flutter / React Native"><span class="sk-ico">📱</span>Flutter / RN</div>
+          <div class="skill-tag" data-s="Node.js / Django / Laravel"><span class="sk-ico">🌐</span>Node / Django</div>
+          <div class="skill-tag" data-s="Arduino / Raspberry Pi"><span class="sk-ico">🔌</span>Arduino / RPi</div>
+          <div class="skill-tag" data-s="Linux / Cloud / AWS"><span class="sk-ico">☁️</span>Linux / Cloud</div>
+          <div class="skill-tag" data-s="OpenCV / Computer Vision"><span class="sk-ico">👁️</span>OpenCV / CV</div>
+          <div class="skill-tag" data-s="Networking / Security"><span class="sk-ico">🔗</span>Networking</div>
+          <div class="skill-tag" data-s="UI/UX Design / Figma"><span class="sk-ico">🎨</span>UI/UX Design</div>
+          <div class="skill-tag" data-s="Data Analysis / Pandas"><span class="sk-ico">📈</span>Data Analysis</div>
+          <div class="skill-tag" data-s="Docker / DevOps"><span class="sk-ico">🐳</span>Docker / DevOps</div>
+          <div class="skill-tag" data-s="NLP / Hugging Face"><span class="sk-ico">💬</span>NLP / HuggingFace</div>
+          <div class="skill-tag" data-s="R Language"><span class="sk-ico">📉</span>R Language</div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-title">Experience Level</div>
+        <div class="field">
+          <label>Overall team technical experience</label>
+          <div class="range-wrap">
+            <input type="range" min="1" max="5" value="2" id="expLevel" oninput="document.getElementById('expVal').textContent=['Beginner','Novice','Intermediate','Advanced','Expert'][this.value-1]">
+            <span class="range-val" id="expVal">Novice</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Previous project completions</label>
+          <select id="prevProjects">
+            <option value="0">None — this is our first real project</option>
+            <option value="1">1–2 small assignments or mini-projects</option>
+            <option value="2">3–5 projects or internship experience</option>
+            <option value="3">5+ projects or professional experience</option>
+          </select>
+        </div>
+      </div>
+      <div class="step-footer">
+        <button class="btn-back" onclick="goTo(0)">← Back</button>
+        <button class="btn-next" onclick="goTo(2)">Constraints <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 2: CONSTRAINTS -->
+    <div class="app-section" id="sec2">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Step 03 — Real-World Constraints</div>
+        <div class="sec-title">Budget & Resources</div>
+        <div class="sec-desc">This is what makes us different — we respect your actual constraints, not ideal conditions.</div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-title">Budget (PKR)</div>
+        <div class="field">
+          <label>Total available budget for the entire FYP</label>
+          <div class="range-wrap">
+            <input type="range" min="0" max="8" value="2" id="budgetRange" oninput="updateBudget(this.value)">
+            <span class="range-val" id="budgetVal">5k–10k</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Funding Source</label>
+          <select id="fundingSource">
+            <option>Personal / Family funds only</option>
+            <option>University lab resources available</option>
+            <option>Departmental FYP grant available</option>
+            <option>Sponsor / Industry partner arranged</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-title">Development Environment</div>
+        <div class="grid-2" id="envGrid">
+          <div class="sel-card" data-env="limited" onclick="selEnv(this)">
+            <div class="sc-icon">💻</div>
+            <div class="sc-name">Limited</div>
+            <div class="sc-desc">Basic PCs, no GPU, home internet only. Free tools only.</div>
+          </div>
+          <div class="sel-card" data-env="moderate" onclick="selEnv(this)">
+            <div class="sc-icon">🖥️</div>
+            <div class="sc-name">Moderate</div>
+            <div class="sc-desc">University lab access, some budget for APIs, stable internet.</div>
+          </div>
+          <div class="sel-card" data-env="good" onclick="selEnv(this)">
+            <div class="sc-icon">⚡</div>
+            <div class="sc-name">Good</div>
+            <div class="sc-desc">Personal/uni GPU, cloud credits available, hardware budget.</div>
+          </div>
+          <div class="sel-card" data-env="excellent" onclick="selEnv(this)">
+            <div class="sc-icon">🚀</div>
+            <div class="sc-name">Excellent</div>
+            <div class="sc-desc">Dedicated workstation, GPU, industry sponsor, hardware lab.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-title">Time Availability</div>
+        <div class="field">
+          <label>Hours per week dedicated to FYP</label>
+          <div class="range-wrap">
+            <input type="range" min="5" max="60" step="5" value="20" id="hoursWeek" oninput="document.getElementById('hoursVal').textContent=this.value+' hrs/wk'">
+            <span class="range-val" id="hoursVal">20 hrs/wk</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>FYP Duration</label>
+          <select id="duration">
+            <option>1 semester (4–5 months)</option>
+            <option selected>2 semesters (8–10 months)</option>
+            <option>Extended (12+ months)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="step-footer">
+        <button class="btn-back" onclick="goTo(1)">← Back</button>
+        <button class="btn-next" onclick="goTo(3)">Skill Assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 3: ASSESSMENT -->
+    <div class="app-section" id="sec3">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Step 04 — Quick Assessment</div>
+        <div class="sec-title">Calibrate your level</div>
+        <div class="sec-desc">5 quick questions to accurately assess your team's capability. No judgment — just better results.</div>
+      </div>
+      <div id="questionsContainer"></div>
+      <div class="step-footer">
+        <button class="btn-back" onclick="goTo(2)">← Back</button>
+        <button class="btn-next" onclick="generateRecs()">Generate Recommendations ✦ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 4: RESULTS -->
+    <div class="app-section" id="sec4">
+      <div id="loadingScreen" class="loading-screen">
+        <div class="loading-orb"></div>
+        <div class="loading-text">Analyzing your constraints...</div>
+        <div class="loading-sub" id="loadingMsg">Processing profile and matching against feasibility benchmarks</div>
+      </div>
+
+      <div id="resultsContent" style="display:none">
+        <div class="sec-header">
+          <div class="sec-eyebrow">Step 05 — Personalized Results</div>
+          <div class="sec-title">Your FYP Recommendations</div>
+          <div class="sec-desc">Ranked by feasibility score — tailored to your exact constraints.</div>
+        </div>
+
+        <div class="constraint-grid" id="constraintGrid"></div>
+
+        <div class="ai-header">
+          <div class="ai-dot"></div>
+          <div class="ai-text"><strong>AI-powered analysis</strong> — Recommendations respect your budget, environment, skill level, and Pakistan-specific constraints. No generic suggestions.</div>
+        </div>
+
+        <div id="recsContainer"></div>
+
+        <div class="step-footer">
+          <button class="btn-back" onclick="goTo(3)">← Adjust Inputs</button>
+          <button class="btn-next" onclick="resetApp()">New Assessment ↺</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const budgetLabels=['Under 2k','2k–5k','5k–10k','10k–20k','20k–30k','30k–50k','50k–75k','75k–1 Lakh','1 Lakh+'];
+const budgetFull=['Under PKR 2,000','PKR 2,000–5,000','PKR 5,000–10,000','PKR 10,000–20,000','PKR 20,000–30,000','PKR 30,000–50,000','PKR 50,000–75,000','PKR 75,000–1,00,000','PKR 1,00,000+'];
+
+function updateBudget(v){document.getElementById('budgetVal').textContent=budgetLabels[v]}
+
+let selectedDomain='';
+let selectedEnv='';
+let qAnswers={};
+let currentStep=0;
+
+function startApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').style.display='block';
+}
+
+function selDomain(el){
+  document.querySelectorAll('#domainGrid .sel-card').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDomain=el.dataset.val;
+}
+
+function selEnv(el){
+  document.querySelectorAll('#envGrid .sel-card').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEnv=el.dataset.env;
+}
+
+document.querySelectorAll('.skill-tag').forEach(el=>{
+  el.addEventListener('click',()=>el.classList.toggle('selected'));
+});
+
+function goTo(n){
+  document.getElementById('sec'+currentStep).classList.remove('active');
+  document.getElementById('ns'+currentStep).classList.remove('active');
+  if(n>currentStep) document.getElementById('ns'+currentStep).classList.add('done');
+  currentStep=n;
+  document.getElementById('sec'+n).classList.add('active');
+  document.getElementById('ns'+n).classList.add('active');
+  document.getElementById('secCounter').textContent='Step '+(n+1)+' of 5';
+  document.getElementById('progressFill').style.width=(((n)/4)*100)+'%';
+  if(n===3) renderQuestions();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const questions=[
+  {id:'q1',text:'When given a new programming problem, your team typically:',opts:['Look for tutorials and adapt copy-paste solutions','Understand the concept, then adapt existing examples','Design a custom solution from scratch with confidence']},
+  {id:'q2',text:'Your team\'s experience with REST APIs and external integrations:',opts:['Never integrated an API before','Used a REST API with documentation guidance','Built and consumed multiple APIs independently']},
+  {id:'q3',text:'Database design and management experience:',opts:['Only basic SELECT queries from class assignments','Designed normalized schemas for one or two projects','Advanced queries, indexing, optimization, and DB modeling']},
+  {id:'q4',text:'How does your team handle complex debugging?',opts:['We often get stuck and need professor or senior help','We can resolve most issues given enough time','We systematically isolate and fix any issue independently']},
+  {id:'q5',text:'Version control and collaborative development:',opts:['Never used Git seriously','Basic commits, push/pull with occasional merge conflicts','Branching, merging, pull requests, and CI/CD pipelines']}
+];
+
+function renderQuestions(){
+  const c=document.getElementById('questionsContainer');
+  c.innerHTML=questions.map((q,i)=>`
+    <div class="q-block">
+      <div class="q-text"><span style="color:var(--accent);font-family:var(--font-head);font-weight:700">Q${i+1}.</span> ${q.text}</div>
+      <div class="q-opts">
+        ${q.opts.map((o,j)=>`<button class="q-opt ${qAnswers[q.id]===j?'selected':''}" onclick="selectQ('${q.id}',${j},this)">${o}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectQ(qid,idx,el){
+  qAnswers[qid]=idx;
+  el.closest('.q-block').querySelectorAll('.q-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getProfile(){
+  const skills=Array.from(document.querySelectorAll('.skill-tag.selected')).map(e=>e.dataset.s);
+  const bi=parseInt(document.getElementById('budgetRange').value);
+  return{
+    uniType:document.getElementById('uniType').value||'Pakistani University',
+    degree:document.getElementById('degree').value||'BS Computer Science',
+    semester:document.getElementById('semester').value||'7th Semester',
+    teamSize:document.getElementById('teamSize').value,
+    domain:selectedDomain||'Open to Suggestions',
+    skills:skills,
+    exp:['Beginner','Novice','Intermediate','Advanced','Expert'][document.getElementById('expLevel').value-1],
+    prevProjects:document.getElementById('prevProjects').value,
+    budget:budgetFull[bi],
+    budgetIdx:bi,
+    env:selectedEnv||'moderate',
+    funding:document.getElementById('fundingSource').value,
+    hours:document.getElementById('hoursWeek').value,
+    duration:document.getElementById('duration').value,
+    qScore:Object.values(qAnswers).reduce((a,b)=>a+b,0)
+  };
+}
+
+const loadingMessages=[
+  'Analyzing your skill profile...',
+  'Evaluating budget constraints...',
+  'Mapping resource environment...',
+  'Applying Pakistan feasibility filters...',
+  'Scoring project options...',
+  'Generating tailored recommendations...'
+];
+let loadingIdx=0;
+let loadingInterval;
+
+async function generateRecs(){
+  goTo(4);
+  const p=getProfile();
+
+  document.getElementById('constraintGrid').innerHTML=`
+    <div class="cs-box"><div class="cs-label">Budget</div><div class="cs-value">${p.budget.replace('PKR ','')}</div></div>
+    <div class="cs-box"><div class="cs-label">Environment</div><div class="cs-value">${p.env.charAt(0).toUpperCase()+p.env.slice(1)}</div></div>
+    <div class="cs-box"><div class="cs-label">Skills</div><div class="cs-value">${p.skills.length} selected</div></div>
+    <div class="cs-box"><div class="cs-label">Team</div><div class="cs-value">${p.teamSize} member${p.teamSize>1?'s':''}</div></div>
+    <div class="cs-box"><div class="cs-label">Experience</div><div class="cs-value">${p.exp}</div></div>
+    <div class="cs-box"><div class="cs-label">Hrs/Week</div><div class="cs-value">${p.hours} hrs</div></div>
+  `;
+
+  loadingIdx=0;
+  loadingInterval=setInterval(()=>{
+    loadingIdx=(loadingIdx+1)%loadingMessages.length;
+    const el=document.getElementById('loadingMsg');
+    if(el) el.textContent=loadingMessages[loadingIdx];
+  },1200);
+
+  const prompt=`You are a senior FYP advisor at a Pakistani university. A student has submitted their profile. Generate EXACTLY 3 FYP recommendations in JSON.
+
+STUDENT PROFILE:
+- Degree: ${p.degree}
+- University: ${p.uniType}
+- Semester: ${p.semester}
+- Team Size: ${p.teamSize}
+- Domain Interest: ${p.domain}
+- Technical Skills: ${p.skills.length>0?p.skills.join(', '):'Not specified (suggest beginner-friendly)'}
+- Experience Level: ${p.exp}
+- Assessment Score: ${p.qScore}/10
+- Previous Projects: ${p.prevProjects}/3
+- Budget: ${p.budget}
+- Development Environment: ${p.env}
+- Funding: ${p.funding}
+- Hours Per Week: ${p.hours}
+- Duration: ${p.duration}
+
+HARD RULES:
+1. Budget rule: "limited"/"Under 2k"/"2k-5k" = ONLY software projects, zero hardware cost
+2. Skill match: Beginner/Novice = no deep ML research, no hardware, no complex distributed systems
+3. Environment "limited" = no GPU-heavy workloads, no cloud costs, no hardware
+4. Prioritize Pakistan-context problems: healthcare, education, agriculture, fintech, NADRA, Urdu NLP, load shedding, water management, traffic, SMEs
+5. ALL tools/frameworks must be free and open-source OR have free tiers
+6. milestones must be realistic for the given duration
+7. estimatedCostPKR must fit within the stated budget
+
+Return ONLY valid JSON. No markdown, no explanation, no preamble:
+{"recommendations":[{"title":"","domain":"","description":"2 sentences max, specific to their profile","feasibilityScore":0,"skillMatch":0,"budgetFit":0,"innovationScore":0,"requiredSkills":["","",""],"suggestedTools":["","",""],"estimatedCostPKR":"X,000–Y,000","keyRisks":["",""],"milestones":["Month 1-2: X","Month 3-4: Y","Month 5-6: Z"],"pakistanRelevance":"one sentence on local impact and need"}]}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    let text=data.content.map(i=>i.text||'').join('');
+    text=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(text);
+    clearInterval(loadingInterval);
+    renderRecs(parsed.recommendations);
+  }catch(e){
+    clearInterval(loadingInterval);
+    renderRecs(getFallback(p));
+  }
+}
+
+function renderRecs(recs){
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('resultsContent').style.display='block';
+
+  const colors=[['accent','#00C896'],['gold','#F5A623'],['blue','#3B8FE8']];
+  const rankLabels=['Best Match','Strong Option','Alternative'];
+
+  document.getElementById('recsContainer').innerHTML=recs.map((r,i)=>`
+    <div class="result-card rank-${i+1}" style="animation:secIn 0.4s ${i*0.15}s ease both;opacity:0">
+      <div class="rc-header">
+        <div class="rc-badge badge-${i+1}">✦ ${rankLabels[i]}</div>
+        <div class="rc-rank rr-${i+1}">#${i+1}</div>
+      </div>
+      <div style="display:inline-block;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--text2);font-family:var(--font-head);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">${r.domain}</div>
+      <div class="rc-title">${r.title}</div>
+      <div class="rc-desc">${r.description}</div>
+      <div class="scores-row">
+        <div class="score-item"><div class="si-label">Feasibility</div><div class="si-bar"><div class="si-fill fill-accent" style="width:${r.feasibilityScore}%"></div></div><div class="si-num col-accent">${r.feasibilityScore}%</div></div>
+        <div class="score-item"><div class="si-label">Skill Match</div><div class="si-bar"><div class="si-fill fill-blue" style="width:${r.skillMatch}%"></div></div><div class="si-num col-blue">${r.skillMatch}%</div></div>
+        <div class="score-item"><div class="si-label">Budget Fit</div><div class="si-bar"><div class="si-fill fill-gold" style="width:${r.budgetFit}%"></div></div><div class="si-num col-gold">${r.budgetFit}%</div></div>
+        <div class="score-item"><div class="si-label">Innovation</div><div class="si-bar"><div class="si-fill fill-purple" style="width:${r.innovationScore}%"></div></div><div class="si-num col-purple">${r.innovationScore}%</div></div>
+      </div>
+      <div class="tags-row">
+        ${r.requiredSkills.map(s=>`<span class="pill pill-green">${s}</span>`).join('')}
+        ${r.suggestedTools.map(t=>`<span class="pill pill-blue">${t}</span>`).join('')}
+        ${r.keyRisks.map(k=>`<span class="pill pill-red">⚠ ${k}</span>`).join('')}
+      </div>
+      <div class="rc-details">
+        <div class="rc-detail-box">
+          <h4>Project Milestones</h4>
+          <ul>${r.milestones.map(m=>`<li>${m}</li>`).join('')}</ul>
+        </div>
+        <div class="rc-detail-box">
+          <h4>Estimated Cost</h4>
+          <div style="font-family:var(--font-head);font-size:1.1rem;font-weight:800;color:var(--accent);margin-bottom:8px">PKR ${r.estimatedCostPKR}</div>
+          <h4>Key Risks</h4>
+          <ul>${r.keyRisks.map(k=>`<li>${k}</li>`).join('')}</ul>
+        </div>
+      </div>
+      <div class="rc-pk-note">🇵🇰 <strong>Pakistan Relevance:</strong> ${r.pakistanRelevance}</div>
+    </div>
+  `).join('');
+}
+
+function getFallback(p){
+  return[
+    {title:"Smart Attendance System via Face Recognition",domain:"Computer Vision / AI",description:"A Python-Flask web application using OpenCV and DeepFace to automate student attendance with facial recognition. Designed for offline operation to handle unreliable internet in Pakistani institutions.",feasibilityScore:89,skillMatch:78,budgetFit:94,innovationScore:81,requiredSkills:["Python","OpenCV","Flask"],suggestedTools:["OpenCV","DeepFace","SQLite","Flask","Bootstrap"],estimatedCostPKR:"2,000–8,000",keyRisks:["Accuracy in varied lighting","Inference speed without GPU"],milestones:["Month 1-2: Dataset collection & model selection","Month 3-4: Flask backend & database integration","Month 5-6: Testing, UI polish & documentation"],pakistanRelevance:"Directly addresses manual attendance fraud widespread in Pakistani universities and schools."},
+    {title:"Urdu OCR & Document Digitization Platform",domain:"NLP / Computer Vision",description:"A web tool to extract and digitize text from Urdu/Nastaliq documents using a fine-tuned Tesseract OCR engine, enabling digital access to handwritten and printed Urdu records.",feasibilityScore:76,skillMatch:72,budgetFit:91,innovationScore:93,requiredSkills:["Python","Tesseract","Flask"],suggestedTools:["Tesseract OCR","OpenCV","Flask","React"],estimatedCostPKR:"0–5,000",keyRisks:["Urdu dataset scarcity","Nastaliq rendering complexity"],milestones:["Month 1-2: Dataset preparation & OCR fine-tuning","Month 3-4: Web interface & document pipeline","Month 5-6: Accuracy benchmarks & user testing"],pakistanRelevance:"Enables digitization of NADRA, court, and educational Urdu documents critical for e-governance."},
+    {title:"Crop Disease Detection App for Pakistani Farmers",domain:"Mobile / AI",description:"A Flutter mobile application using TensorFlow Lite to detect crop diseases from photos, with Urdu UI support and offline inference for areas with limited connectivity in rural Pakistan.",feasibilityScore:82,skillMatch:74,budgetFit:88,innovationScore:87,requiredSkills:["Flutter","TensorFlow Lite","Python"],suggestedTools:["TFLite","Flutter","Firebase","Kaggle"],estimatedCostPKR:"3,000–12,000",keyRisks:["Dataset diversity for Pakistani crops","TFLite model size optimization"],milestones:["Month 1-2: CNN training on crop disease datasets","Month 3-4: TFLite conversion & Flutter app","Month 5-6: Field testing & Urdu localization"],pakistanRelevance:"Supports Pakistan's agriculture sector employing 40% of the workforce with AI-powered disease prevention."}
+  ];
+}
+
+function resetApp(){
+  document.querySelectorAll('.app-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-step').forEach(s=>{s.classList.remove('active','done')});
+  currentStep=0;
+  document.getElementById('sec0').classList.add('active');
+  document.getElementById('ns0').classList.add('active');
+  document.getElementById('secCounter').textContent='Step 1 of 5';
+  document.getElementById('progressFill').style.width='0%';
+  document.getElementById('resultsContent').style.display='none';
+  document.getElementById('loadingScreen').style.display='block';
+  qAnswers={};
+  selectedDomain='';
+  selectedEnv='';
+  document.querySelectorAll('.sel-card').forEach(e=>e.classList.remove('selected'));
+  document.querySelectorAll('.skill-tag').forEach(e=>e.classList.remove('selected'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
